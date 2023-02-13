@@ -138,7 +138,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
         {
             title: earlyBird && (new Date(earlyBird.end) > new Date()) ? 'Cena do: ' + new Intl.DateTimeFormat('pl-PL').format(new Date(earlyBird.end)) : 'Cena',
             description: <span>
-                {earlyBird && <del style={{ marginRight: 10 }}>{new Intl.NumberFormat('pl-PL', {
+                {earlyBird && (new Date(earlyBird.end) > new Date()) && <del style={{ marginRight: 10 }}>{new Intl.NumberFormat('pl-PL', {
                     style: 'currency',
                     currency: price.currency
                 }).format(price.amount)}</del>}
