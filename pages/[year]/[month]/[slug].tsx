@@ -322,7 +322,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
 export const getStaticProps: GetStaticProps = async (context) => {
     const data = await fetch('https://api.face-clinic.pl/courses').then(response => response.json());
     const { slug, month, year } = context.params as ContextParams;
-    const course = data.find((course: Course) => {
+    const course = data.filter((course: Course) => new Date(course.start) > new Date()).find((course: Course) => {
         const date = new Date(course.start);
         return course.slug === slug && zeroPad(date.getUTCMonth() + 1, 2) == month && date.getFullYear().toString() === year;
     });
@@ -337,7 +337,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
     const data = await fetch('https://api.face-clinic.pl/courses').then(response => response.json());
-    const paths = data.map((course: Course) => {
+    const paths = data.filter((course: Course) => new Date(course.start) > new Date()).map((course: Course) => {
         const startDate = new Date(course.start);
         return ({
             params: {
