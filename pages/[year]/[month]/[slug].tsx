@@ -7,22 +7,23 @@ import {
     createStyles,
     Grid,
     Group,
-    Image, Tabs,
+    Image,
+    Tabs,
     Text,
     TextInput,
     Title
 } from '@mantine/core';
-import { Lector } from '../../../components/Lector';
-import { CourseDetailsIcons } from '../../../components/Icons';
-import { openConfirmModal } from '@mantine/modals';
-import { GetStaticPaths, GetStaticProps } from 'next'
+import {Lector} from '../../../components/Lector';
+import {CourseDetailsIcons} from '../../../components/Icons';
+import {openConfirmModal} from '@mantine/modals';
+import {GetStaticPaths, GetStaticProps} from 'next'
 import Head from "next/head";
-import { Course } from "../../../types";
-import { ParsedUrlQuery } from "querystring";
-import { IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin } from "@tabler/icons";
+import {Course} from "../../../types";
+import {ParsedUrlQuery} from "querystring";
+import {IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin} from "@tabler/icons";
 import React from "react";
-import { useForm } from "@mantine/form";
-import { marked } from 'marked';
+import {useForm} from "@mantine/form";
+import {marked} from 'marked';
 
 const useStyles = createStyles((theme) => ({
     wrapper: {
@@ -114,8 +115,8 @@ interface ContextParams extends ParsedUrlQuery {
     slug: string
 }
 
-function CourseDetails({ name, description, agenda, start, end, id, price, trainers, earlyBird }: Course) {
-    const { classes } = useStyles();
+function CourseDetails({name, description, agenda, start, end, id, price, trainers, earlyBird}: Course) {
+    const {classes} = useStyles();
     const form = useForm({
         initialValues: {
             name: '',
@@ -133,17 +134,20 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
         },
     });
     const isStillEarlyBirdPrice = earlyBird ? new Date(earlyBird.end) > new Date() : false;
+    const startDate = new Intl.DateTimeFormat('pl-PL').format(new Date(start));
+    const endDate = new Intl.DateTimeFormat('pl-PL').format(new Date(end));
+    const resultDate = startDate === endDate ? startDate : `${startDate} - ${endDate}`;
     const details = [
         {
             title: 'Data',
-            description: `${new Intl.DateTimeFormat('pl-PL').format(new Date(start))} - ${new Intl.DateTimeFormat('pl-PL').format(new Date(end))}`,
+            description: resultDate,
             icon: IconCalendarEvent
         },
         {
             title: isStillEarlyBirdPrice ? 'Cena do: ' + new Intl.DateTimeFormat('pl-PL').format(new Date(earlyBird!.end)) : 'Cena',
             description: <span>
                 {isStillEarlyBirdPrice &&
-                    <del style={{ marginRight: 10 }}>{new Intl.NumberFormat('pl-PL', {
+                    <del style={{marginRight: 10}}>{new Intl.NumberFormat('pl-PL', {
                         style: 'currency',
                         currency: price.currency
                     }).format(price.amount)}</del>}
@@ -154,7 +158,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
             </span>,
             icon: IconDiscount2
         },
-        { title: 'Adres', description: 'ul. Łuczek 4, Warszawa', icon: IconMapPin },
+        {title: 'Adres', description: 'ul. Łuczek 4, Warszawa', icon: IconMapPin},
     ];
     return (
         <>
@@ -165,7 +169,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                 <Container>
                     <Title className={classes.title}>{name}</Title>
                     <Box className={classes.description} mt="sm" mb="md"
-                         dangerouslySetInnerHTML={{ __html: description }}/>
+                         dangerouslySetInnerHTML={{__html: description}}/>
                     <CourseDetailsIcons data={details}/>
                     <Title className={classes.title} order={3} mt="md" mb="md">Kurs prowadzą:</Title>
                     <Group>
@@ -176,7 +180,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                     </Group>
                     <Box>
                         <Title className={classes.title} order={3} mt="md" mb="md">Program szkolenia:</Title>
-                        <Box className={classes.description} dangerouslySetInnerHTML={{ __html: agenda }}/>
+                        <Box className={classes.description} dangerouslySetInnerHTML={{__html: agenda}}/>
                     </Box>
 
                     <form className={classes.form} onSubmit={form.onSubmit((values) => {
@@ -200,12 +204,12 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                     </Text>
                                 ),
                                 cancelProps: {
-                                    sx: { display: 'none' }
+                                    sx: {display: 'none'}
                                 },
                                 confirmProps: {
                                     color: 'green'
                                 },
-                                labels: { confirm: 'OK', cancel: '' },
+                                labels: {confirm: 'OK', cancel: ''},
                                 onConfirm() {
                                     form.reset();
                                 }
@@ -221,12 +225,12 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                     </Text>
                                 ),
                                 cancelProps: {
-                                    sx: { display: 'none' }
+                                    sx: {display: 'none'}
                                 },
                                 confirmProps: {
                                     color: 'red'
                                 },
-                                labels: { confirm: 'OK', cancel: 'Cancel' }
+                                labels: {confirm: 'OK', cancel: 'Cancel'}
                             })
                         });
                     })}>
@@ -236,7 +240,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                 <TextInput
                                     label="Imię i Nazwisko"
                                     placeholder="Jan Kowalski"
-                                    classNames={{ input: classes.input, label: classes.inputLabel }}
+                                    classNames={{input: classes.input, label: classes.inputLabel}}
                                     required
                                     {...form.getInputProps('name')}
                                 />
@@ -256,7 +260,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                     label="Numer telefonu"
                                     placeholder="+48123456789"
                                     inputMode='tel'
-                                    classNames={{ input: classes.input, label: classes.inputLabel }}
+                                    classNames={{input: classes.input, label: classes.inputLabel}}
                                     required
                                     {...form.getInputProps('phone')}
                                 />
@@ -265,7 +269,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                 <TextInput
                                     label="Numer prawa wyk. zawodu"
                                     placeholder="1234567"
-                                    classNames={{ input: classes.input, label: classes.inputLabel }}
+                                    classNames={{input: classes.input, label: classes.inputLabel}}
                                     required
                                     {...form.getInputProps('license')}
                                 />
@@ -284,7 +288,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                             required
                                             maxLength={100}
                                             placeholder="ul. Ulicowa 123, 00-001 Warszawa"
-                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            classNames={{input: classes.input, label: classes.inputLabel}}
                                             disabled={form.values.nip.length > 0}
                                             {...form.getInputProps('pesel')}
                                         />
@@ -296,7 +300,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                             required
                                             maxLength={100}
                                             placeholder="ul. Ulicowa 123, 00-001 Warszawa"
-                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            classNames={{input: classes.input, label: classes.inputLabel}}
                                             disabled={form.values.nip.length > 0}
                                             {...form.getInputProps('pesel')}
                                         />
@@ -306,7 +310,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                             minLength={10}
                                             required
                                             placeholder="664-399-17-18"
-                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            classNames={{input: classes.input, label: classes.inputLabel}}
                                             disabled={form.values.pesel.length > 0}
                                             {...form.getInputProps('nip')}
                                         />
@@ -327,7 +331,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                         świadczeniu usług drogą elektroniczną Dz. U. nr 144 poz. 1204 oraz ustawą Prawo
                                         telekomunikacyjne Dz. U. 2004 r. nr 171, poz. 1800).</small>}
                                     color="brown"
-                                    {...form.getInputProps('termsOfService', { type: 'checkbox' })}
+                                    {...form.getInputProps('termsOfService', {type: 'checkbox'})}
                                 />
                             </Grid.Col>
                         </Grid>
@@ -340,7 +344,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                 </Container>
                 <footer className={classes.footer}>
                     <Container className={classes.inner}>
-                        <a href="https://face-clinic.pl"><Image sx={{ opacity: 0.5 }} alt="Face-Clinic" src="/logo.svg"
+                        <a href="https://face-clinic.pl"><Image sx={{opacity: 0.5}} alt="Face-Clinic" src="/logo.svg"
                                                                 width={50}/></a>
                         <Group spacing={1} className={classes.links} position="right" noWrap>
                             <ActionIcon size="lg" component="a"
@@ -393,7 +397,7 @@ function isValidPesel(pesel: string) {
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const data = await fetch('https://api.face-clinic.pl/courses').then(response => response.json());
-    const { slug, month, year } = context.params as ContextParams;
+    const {slug, month, year} = context.params as ContextParams;
     const course = data.filter((course: Course) => new Date(course.start) > new Date()).find((course: Course) => {
         const date = new Date(course.start);
         return course.slug === slug && zeroPad(date.getUTCMonth() + 1, 2) == month && date.getFullYear().toString() === year;
@@ -419,7 +423,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
             }
         });
     });
-    return { paths, fallback: false }
+    return {paths, fallback: false}
 }
 
 function zeroPad(num: number, places: number) {
