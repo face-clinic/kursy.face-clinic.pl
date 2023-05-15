@@ -7,7 +7,7 @@ import {
     createStyles,
     Grid,
     Group,
-    Image,
+    Image, Tabs,
     Text,
     TextInput,
     Title
@@ -122,13 +122,17 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
             phone: '',
             license: '',
             nip: '',
+            pesel: '',
             email: '',
             termsOfService: false,
         },
         validate: {
             name: (value) => (value.length > 5 ? null : 'Wprowadź poprawne dane'),
+            nip: (value, values) => values.pesel.length !== 0 || isValidNip(value) ? null : 'Wprowadź poprawny NIP',
+            pesel: (value, values) => values.nip.length !== 0 || isValidPesel(value) ? null : 'Wprowadź poprawny PESEL'
         },
     });
+    const isStillEarlyBirdPrice = earlyBird ? new Date(earlyBird.end) > new Date() : false;
     const details = [
         {
             title: 'Data',
@@ -136,16 +140,17 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
             icon: IconCalendarEvent
         },
         {
-            title: earlyBird && (new Date(earlyBird.end) > new Date()) ? 'Cena do: ' + new Intl.DateTimeFormat('pl-PL').format(new Date(earlyBird.end)) : 'Cena',
+            title: isStillEarlyBirdPrice ? 'Cena do: ' + new Intl.DateTimeFormat('pl-PL').format(new Date(earlyBird!.end)) : 'Cena',
             description: <span>
-                {earlyBird && (new Date(earlyBird.end) > new Date()) && <del style={{ marginRight: 10 }}>{new Intl.NumberFormat('pl-PL', {
-                    style: 'currency',
-                    currency: price.currency
-                }).format(price.amount)}</del>}
+                {isStillEarlyBirdPrice &&
+                    <del style={{ marginRight: 10 }}>{new Intl.NumberFormat('pl-PL', {
+                        style: 'currency',
+                        currency: price.currency
+                    }).format(price.amount)}</del>}
                 {new Intl.NumberFormat('pl-PL', {
                     style: 'currency',
                     currency: price.currency
-                }).format(earlyBird ? earlyBird.price.amount : price.amount)}
+                }).format(isStillEarlyBirdPrice ? earlyBird!.price.amount : price.amount)}
             </span>,
             icon: IconDiscount2
         },
@@ -181,7 +186,7 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                 "Content-Type": "application/json"
                             },
                             body: JSON.stringify(values),
-                        }).then(function (response) {
+                        }).then(response => {
                             if (!response.ok) {
                                 throw new Error("error");
                             }
@@ -266,14 +271,50 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
                                 />
                             </Grid.Col>
                             <Grid.Col xs={12}>
-                                <TextInput
-                                    label="NIP"
-                                    description="w przypadku faktury na firmę"
-                                    placeholder="1234567"
-                                    classNames={{ input: classes.input, label: classes.inputLabel }}
-                                    {...form.getInputProps('nip')}
-                                />
+                                <Title mb="md" size="h5">Dane do faktury</Title>
+
+                                <Tabs variant="pills" defaultValue="personal" radius="xs">
+                                    <Tabs.List>
+                                        <Tabs.Tab value="personal">Faktura imienna</Tabs.Tab>
+                                        <Tabs.Tab value="company">Faktura na firmę</Tabs.Tab>
+                                    </Tabs.List>
+                                    <Tabs.Panel value="personal" pt="xs">
+                                        <TextInput
+                                            label="Adres"
+                                            required
+                                            maxLength={100}
+                                            placeholder="ul. Ulicowa 123, 00-001 Warszawa"
+                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            disabled={form.values.nip.length > 0}
+                                            {...form.getInputProps('pesel')}
+                                        />
+
+                                    </Tabs.Panel>
+                                    <Tabs.Panel value="company" pt="xs">
+                                        <TextInput
+                                            label="Adres"
+                                            required
+                                            maxLength={100}
+                                            placeholder="ul. Ulicowa 123, 00-001 Warszawa"
+                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            disabled={form.values.nip.length > 0}
+                                            {...form.getInputProps('pesel')}
+                                        />
+                                        <TextInput
+                                            label="NIP"
+                                            maxLength={13}
+                                            minLength={10}
+                                            required
+                                            placeholder="664-399-17-18"
+                                            classNames={{ input: classes.input, label: classes.inputLabel }}
+                                            disabled={form.values.pesel.length > 0}
+                                            {...form.getInputProps('nip')}
+                                        />
+                                    </Tabs.Panel>
+                                </Tabs>
+
                             </Grid.Col>
+
                             <Grid.Col xs={12}>
                                 <Checkbox
                                     required
@@ -317,6 +358,37 @@ function CourseDetails({ name, description, agenda, start, end, id, price, train
         </>
 
     );
+}
+
+function isValidNip(nip: string) {
+    nip = nip.replace(/-/g, '');
+    if (nip.length != 10) return false;
+    for (let i = 0; i < 10; i++)
+        if (isNaN(Number(nip[i])))
+            return false;
+    let sum =
+        6 * Number(nip[0]) +
+        5 * Number(nip[1]) +
+        7 * Number(nip[2]) +
+        2 * Number(nip[3]) +
+        3 * Number(nip[4]) +
+        4 * Number(nip[5]) +
+        5 * Number(nip[6]) +
+        6 * Number(nip[7]) +
+        7 * Number(nip[8]);
+    sum %= 11;
+    return Number(nip[9]) == sum;
+}
+
+function isValidPesel(pesel: string) {
+    let weight = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+    let sum = 0;
+    let controlNumber = parseInt(pesel.substring(10, 11));
+    for (let i = 0; i < weight.length; i++) {
+        sum += (parseInt(pesel.substring(i, i + 1)) * weight[i]);
+    }
+    sum = sum % 10;
+    return (10 - sum) % 10 === controlNumber;
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
