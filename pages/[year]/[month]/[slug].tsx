@@ -21,7 +21,7 @@ import Head from "next/head";
 import {Course} from "../../../types";
 import {ParsedUrlQuery} from "querystring";
 import {IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin} from "@tabler/icons";
-import React from "react";
+import React, {useState} from "react";
 import {useForm} from "@mantine/form";
 import {marked} from 'marked';
 
@@ -117,6 +117,7 @@ interface ContextParams extends ParsedUrlQuery {
 
 function CourseDetails({name, description, agenda, start, end, id, price, trainers, earlyBird}: Course) {
     const {classes} = useStyles();
+    const [isSubmitting, setSubmitting] = useState(false);
     const form = useForm({
         initialValues: {
             name: '',
@@ -184,6 +185,7 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                     </Box>
 
                     <form className={classes.form} onSubmit={form.onSubmit((values) => {
+                        setSubmitting(true);
                         fetch(`https://api.face-clinic.pl/courses/${id}/register`, {
                             method: "POST",
                             headers: {
@@ -227,11 +229,10 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                                         color: 'green'
                                     },
                                     labels: {confirm: 'OK', cancel: ''},
-                                    onConfirm() {
-                                        form.reset();
-                                    }
-                                })
+                                });
+                                form.reset();
                             }
+                            setSubmitting(false);
                         });
                     })}>
                         <Title mb="md" size="h2">Zapisz się na szkolenie</Title>
@@ -327,7 +328,7 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                             </Grid.Col>
                         </Grid>
                         <Group position="right" mt="md">
-                            <Button type="submit">
+                            <Button type="submit" disabled={isSubmitting}>
                                 Zapisz się
                             </Button>
                         </Group>
