@@ -284,10 +284,10 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                                     </Tabs.List>
                                     <Tabs.Panel value="personal" pt="xs">
                                         <TextInput
-                                            label="Adres"
+                                            label="PESEL"
                                             required
-                                            maxLength={100}
-                                            placeholder="ul. Ulicowa 123, 00-001 Warszawa"
+                                            placeholder="77122666278"
+                                            maxLength={11}
                                             classNames={{input: classes.input, label: classes.inputLabel}}
                                             disabled={form.values.nip.length > 0}
                                             {...form.getInputProps('pesel')}
@@ -295,15 +295,6 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
 
                                     </Tabs.Panel>
                                     <Tabs.Panel value="company" pt="xs">
-                                        <TextInput
-                                            label="Adres"
-                                            required
-                                            maxLength={100}
-                                            placeholder="ul. Ulicowa 123, 00-001 Warszawa"
-                                            classNames={{input: classes.input, label: classes.inputLabel}}
-                                            disabled={form.values.nip.length > 0}
-                                            {...form.getInputProps('pesel')}
-                                        />
                                         <TextInput
                                             label="NIP"
                                             maxLength={13}
