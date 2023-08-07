@@ -192,46 +192,46 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                             body: JSON.stringify(values),
                         }).then(response => {
                             if (!response.ok) {
-                                throw new Error("error");
+                                response.text().then(text => {
+                                    openConfirmModal({
+                                        title: 'Wystąpił błąd!',
+                                        children: (
+                                            <Text size="sm">
+                                                {text ? text : 'Coś poszło nie tak.'}
+                                                {' '}Prosimy o spróbowanie ponownie za chwilę lub kontakt z
+                                                mailowy:
+                                                kursy@face-clinic.pl
+                                            </Text>
+                                        ),
+                                        cancelProps: {
+                                            sx: {display: 'none'}
+                                        },
+                                        confirmProps: {
+                                            color: 'red'
+                                        },
+                                        labels: {confirm: 'OK', cancel: 'Cancel'}
+                                    })
+                                })
+                            } else {
+                                openConfirmModal({
+                                    title: 'Rejestracja przebiegła pomyślnie',
+                                    children: (
+                                        <Text size="sm">
+                                            Dziękujemy za zarejestrowanie się na kursie, skontaktujemy się mailowo.
+                                        </Text>
+                                    ),
+                                    cancelProps: {
+                                        sx: {display: 'none'}
+                                    },
+                                    confirmProps: {
+                                        color: 'green'
+                                    },
+                                    labels: {confirm: 'OK', cancel: ''},
+                                    onConfirm() {
+                                        form.reset();
+                                    }
+                                })
                             }
-                            return response;
-                        }).then(() => {
-                            openConfirmModal({
-                                title: 'Rejestracja przebiegła pomyślnie',
-                                children: (
-                                    <Text size="sm">
-                                        Dziękujemy za zarejestrowanie się na kursie, skontaktujemy się mailowo.
-                                    </Text>
-                                ),
-                                cancelProps: {
-                                    sx: {display: 'none'}
-                                },
-                                confirmProps: {
-                                    color: 'green'
-                                },
-                                labels: {confirm: 'OK', cancel: ''},
-                                onConfirm() {
-                                    form.reset();
-                                }
-                            });
-                        }).catch(() => {
-                            openConfirmModal({
-                                title: 'Wystąpił błąd!',
-                                children: (
-                                    <Text size="sm">
-                                        Coś poszło nie tak, prosimy o spróbowanie ponownie za chwilę lub kontakt z
-                                        mailowy:
-                                        kursy@face-clinic.pl
-                                    </Text>
-                                ),
-                                cancelProps: {
-                                    sx: {display: 'none'}
-                                },
-                                confirmProps: {
-                                    color: 'red'
-                                },
-                                labels: {confirm: 'OK', cancel: 'Cancel'}
-                            })
                         });
                     })}>
                         <Title mb="md" size="h2">Zapisz się na szkolenie</Title>
