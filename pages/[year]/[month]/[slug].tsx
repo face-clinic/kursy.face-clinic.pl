@@ -278,7 +278,13 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                             <Grid.Col xs={12}>
                                 <Title mb="md" size="h5">Dane do faktury</Title>
 
-                                <Tabs variant="pills" defaultValue="personal" radius="xs">
+                                <Tabs variant="pills" defaultValue="personal" radius="xs" onTabChange={(tabValue) => {
+                                    if (tabValue == 'personal') {
+                                        form.setFieldValue('nip', '');
+                                    } else if (tabValue == 'company') {
+                                        form.setFieldValue('pesel', '');
+                                    }
+                                }}>
                                     <Tabs.List>
                                         <Tabs.Tab value="personal">Faktura imienna</Tabs.Tab>
                                         <Tabs.Tab value="company">Faktura na firmę</Tabs.Tab>
