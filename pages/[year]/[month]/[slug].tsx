@@ -394,7 +394,10 @@ function isValidPesel(pesel: string) {
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-    const data = await fetch('https://api.face-clinic.pl/courses').then(response => response.json());
+    const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
+        console.log(response.headers);
+        return response.json()
+    });
     const {slug, month, year} = context.params as ContextParams;
     const course = data.filter((course: Course) => new Date(course.start) > new Date()).find((course: Course) => {
         const date = new Date(course.start);
@@ -410,7 +413,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const data = await fetch('https://api.face-clinic.pl/courses').then(response => response.json());
+    const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
+        console.log(response.headers);
+        return response.json()
+    });
     const paths = data.filter((course: Course) => new Date(course.start) > new Date()).map((course: Course) => {
         const startDate = new Date(course.start);
         return ({
