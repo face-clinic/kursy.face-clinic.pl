@@ -17,7 +17,9 @@ export interface Course {
             currency: string;
         }
     }
-    trainers: Trainer[]
+    trainers: Trainer[],
+    companyInvoiceEnabled: boolean;
+    personalInvoiceEnabled: boolean;
 }
 
 export interface Trainer {

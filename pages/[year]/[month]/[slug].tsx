@@ -13,17 +13,17 @@ import {
     TextInput,
     Title
 } from '@mantine/core';
-import {Lector} from '../../../components/Lector';
-import {CourseDetailsIcons} from '../../../components/Icons';
-import {openConfirmModal} from '@mantine/modals';
-import {GetStaticPaths, GetStaticProps} from 'next'
+import { Lector } from '../../../components/Lector';
+import { CourseDetailsIcons } from '../../../components/Icons';
+import { openConfirmModal } from '@mantine/modals';
+import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from "next/head";
-import {Course} from "../../../types";
-import {ParsedUrlQuery} from "querystring";
-import {IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin} from "@tabler/icons";
-import React, {useState} from "react";
-import {useForm} from "@mantine/form";
-import {marked} from 'marked';
+import { Course } from "../../../types";
+import { ParsedUrlQuery } from "querystring";
+import { IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin } from "@tabler/icons";
+import React, { useState } from "react";
+import { useForm } from "@mantine/form";
+import { marked } from 'marked';
 
 const useStyles = createStyles((theme) => ({
     wrapper: {
@@ -115,7 +115,19 @@ interface ContextParams extends ParsedUrlQuery {
     slug: string
 }
 
-function CourseDetails({name, description, agenda, start, end, id, price, trainers, earlyBird}: Course) {
+function CourseDetails({
+                           name,
+                           description,
+                           agenda,
+                           start,
+                           end,
+                           id,
+                           price,
+                           trainers,
+                           earlyBird,
+                           companyInvoiceEnabled,
+                           personalInvoiceEnabled
+                       }: Course) {
     const {classes} = useStyles();
     const [isSubmitting, setSubmitting] = useState(false);
     const form = useForm({
@@ -278,7 +290,8 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                             <Grid.Col xs={12}>
                                 <Title mb="md" size="h5">Dane do faktury</Title>
 
-                                <Tabs variant="pills" defaultValue="personal" radius="xs" onTabChange={(tabValue) => {
+                                <Tabs variant="pills" defaultValue={personalInvoiceEnabled ? "personal" : "company"}
+                                      radius="xs" onTabChange={(tabValue) => {
                                     if (tabValue == 'personal') {
                                         form.setFieldValue('nip', '');
                                     } else if (tabValue == 'company') {
@@ -286,8 +299,9 @@ function CourseDetails({name, description, agenda, start, end, id, price, traine
                                     }
                                 }}>
                                     <Tabs.List>
-                                        <Tabs.Tab value="personal">Faktura imienna</Tabs.Tab>
-                                        <Tabs.Tab value="company">Faktura na firmę</Tabs.Tab>
+                                        {personalInvoiceEnabled &&
+                                            <Tabs.Tab value="personal">Faktura imienna</Tabs.Tab>}
+                                        {companyInvoiceEnabled && <Tabs.Tab value="company">Faktura na firmę</Tabs.Tab>}
                                     </Tabs.List>
                                     <Tabs.Panel value="personal" pt="xs">
                                         <TextInput
@@ -397,7 +411,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
     const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
         if (response.ok) {
             return response.json();
-          }
+        }
         console.log(response.headers);
         throw new Error('Something went wrong');
     });
@@ -419,7 +433,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
         if (response.ok) {
             return response.json();
-          }
+        }
         console.log(response.headers);
         throw new Error('Something went wrong');
     });
