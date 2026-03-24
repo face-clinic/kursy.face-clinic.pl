@@ -18,7 +18,7 @@ import { CourseDetailsIcons } from '../../../components/Icons';
 import { openConfirmModal } from '@mantine/modals';
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from "next/head";
-import { Course } from "../../../types";
+import { Course, CourseInstance } from "../../../types";
 import { ParsedUrlQuery } from "querystring";
 import { IconBrandFacebook, IconBrandInstagram, IconCalendarEvent, IconDiscount2, IconMapPin } from "@tabler/icons";
 import React, { useState } from "react";
@@ -115,19 +115,20 @@ interface ContextParams extends ParsedUrlQuery {
     slug: string
 }
 
+interface CourseDetailsProps extends Omit<Course, 'instances'> {
+    instance: CourseInstance;
+}
+
 function CourseDetails({
                            name,
                            description,
                            agenda,
-                           start,
-                           end,
-                           id,
-                           price,
+                           instance,
                            trainers,
-                           earlyBird,
                            companyInvoiceEnabled,
                            personalInvoiceEnabled
-                       }: Course) {
+                       }: CourseDetailsProps) {
+    const { id: instanceId, start, end, price, earlyBird } = instance;
     const {classes} = useStyles();
     const [isSubmitting, setSubmitting] = useState(false);
     const form = useForm({
@@ -198,7 +199,7 @@ function CourseDetails({
 
                     <form className={classes.form} onSubmit={form.onSubmit((values) => {
                         setSubmitting(true);
-                        fetch(`https://api.face-clinic.pl/courses/${id}/register`, {
+                        fetch(`https://api.face-clinic.pl/instances/${instanceId}/register`, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
@@ -408,7 +409,7 @@ function isValidPesel(pesel: string) {
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-    const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
+    const data: Course[] = await fetch('https://api.face-clinic.pl/courses').then(response => {
         if (response.ok) {
             return response.json();
         }
@@ -416,37 +417,49 @@ export const getStaticProps: GetStaticProps = async (context) => {
         throw new Error('Something went wrong');
     });
     const {slug, month, year} = context.params as ContextParams;
-    const course = data.filter((course: Course) => new Date(course.start) > new Date()).find((course: Course) => {
-        const date = new Date(course.start);
-        return course.slug === slug && zeroPad(date.getUTCMonth() + 1, 2) == month && date.getFullYear().toString() === year;
+    let matchedInstance: CourseInstance | undefined;
+    const course = data.find((course: Course) => {
+        if (course.slug !== slug) return false;
+        matchedInstance = course.instances.find((instance: CourseInstance) => {
+            const date = new Date(instance.start);
+            return new Date(instance.start) > new Date()
+                && zeroPad(date.getUTCMonth() + 1, 2) == month
+                && date.getFullYear().toString() === year;
+        });
+        return !!matchedInstance;
     });
     return {
         props: {
             ...course,
-            agenda: marked.parse(course.agenda),
-            description: marked.parse(course.description)
+            instance: matchedInstance,
+            agenda: marked.parse(course!.agenda),
+            description: marked.parse(course!.description)
         }
     }
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-    const data = await fetch('https://api.face-clinic.pl/courses').then(response => {
+    const data: Course[] = await fetch('https://api.face-clinic.pl/courses').then(response => {
         if (response.ok) {
             return response.json();
         }
         console.log(response.headers);
         throw new Error('Something went wrong');
     });
-    const paths = data.filter((course: Course) => new Date(course.start) > new Date()).map((course: Course) => {
-        const startDate = new Date(course.start);
-        return ({
-            params: {
-                year: `${startDate.getFullYear()}`,
-                month: `${zeroPad(startDate.getUTCMonth() + 1, 2)}`,
-                slug: course.slug,
-            }
-        });
-    });
+    const paths = data.flatMap((course: Course) =>
+        course.instances
+            .filter((instance: CourseInstance) => new Date(instance.start) > new Date())
+            .map((instance: CourseInstance) => {
+                const startDate = new Date(instance.start);
+                return ({
+                    params: {
+                        year: `${startDate.getFullYear()}`,
+                        month: `${zeroPad(startDate.getUTCMonth() + 1, 2)}`,
+                        slug: course.slug,
+                    }
+                });
+            })
+    );
     return {paths, fallback: false}
 }
 
