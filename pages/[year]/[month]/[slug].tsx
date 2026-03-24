@@ -199,7 +199,7 @@ function CourseDetails({
 
                     <form className={classes.form} onSubmit={form.onSubmit((values) => {
                         setSubmitting(true);
-                        fetch(`https://api.face-clinic.pl/instances/${instanceId}/register`, {
+                        fetch(`https://api.face-clinic.pl/courses/instances/${instanceId}/register`, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json"
